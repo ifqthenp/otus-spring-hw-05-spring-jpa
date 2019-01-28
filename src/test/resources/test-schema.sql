@@ -10,15 +10,15 @@ CREATE TABLE authors(
 
 CREATE TABLE genres(
     id BIGINT PRIMARY KEY AUTO_INCREMENT
-    , genre VARCHAR(50) NOT NULL
+    , genre VARCHAR(50) NOT NULL UNIQUE
 );
 
 CREATE TABLE books(
     id BIGINT PRIMARY KEY AUTO_INCREMENT
     , title VARCHAR(255)
-    , author_id BIGINT
-    , genre_id BIGINT
+    , fk_author_id BIGINT
+    , fk_genre_id BIGINT
     , written VARCHAR(4)
-    , FOREIGN KEY (author_id) REFERENCES authors(id) ON DELETE CASCADE
-    , FOREIGN KEY (genre_id) REFERENCES genres(id) ON DELETE CASCADE
+    , FOREIGN KEY (fk_author_id) REFERENCES authors(id) ON DELETE CASCADE
+    , FOREIGN KEY (fk_genre_id) REFERENCES genres(id) ON DELETE CASCADE
 );
