@@ -4,6 +4,8 @@ import java.util.Collection;
 
 public interface CommonRepository<T> {
 
+    long count();
+
     T save(T domain);
 
     Iterable<T> save(Collection<T> domains);
