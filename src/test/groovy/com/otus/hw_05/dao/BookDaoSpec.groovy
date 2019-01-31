@@ -1,7 +1,9 @@
 package com.otus.hw_05.dao
 
 import com.otus.hw_05.dao.impl.BookDaoJpaImpl
+import com.otus.hw_05.dao.impl.CommentDaoJpaImpl
 import com.otus.hw_05.domain.Book
+import com.otus.hw_05.domain.Comment
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
@@ -10,15 +12,19 @@ import spock.lang.Specification
 import spock.lang.Subject
 
 @DataJpaTest
-@Import(BookDaoJpaImpl)
+@Import([BookDaoJpaImpl, CommentDaoJpaImpl])
 class BookDaoSpec extends Specification {
 
     @Subject
     @Autowired
     BookDao bookDao
 
+    @Autowired
+    CommentDao commentDao
+
     void setup() {
         assert bookDao != null
+        assert commentDao != null
     }
 
     def "can find book by id"() {
@@ -164,7 +170,41 @@ class BookDaoSpec extends Specification {
         books.size() == 10
     }
 
+    @DirtiesContext
+    def "can add a comment to a book"() {
+        given:
+        def bookId = 1
+        def text = 'The best book ever'
+        Comment comment = new Comment(text)
+        Book book = bookDao.findById(bookId)
+
+        when:
+        book.addComment(comment)
+        book = bookDao.save(book)
+
+        then:
+        book.comments.last().commentary == text
+        book.getComments().size() == old(book.getComments().size()) + 1
+    }
+
+    @DirtiesContext
+    def "can delete a comment from a book"() {
+        given:
+        def bookId = 2
+        def commentId = 3
+        def comment = commentDao.findById(commentId)
+        def book = bookDao.findById(bookId)
+
+        when:
+        book.removeComment(comment)
+        book = bookDao.save(book)
+
+        then:
+        book.comments.size() == old(book.comments.size()) - 1
+    }
+
     void cleanup() {
         bookDao = null
+        commentDao = null
     }
 }

@@ -62,6 +62,7 @@ public class BookDaoJpaImpl implements BookDao {
     @Override
     public Book save(final Book domain) {
         em.persist(domain);
+        em.flush();
         return domain;
     }
 
