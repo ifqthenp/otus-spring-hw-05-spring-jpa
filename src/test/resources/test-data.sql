@@ -25,3 +25,9 @@ INSERT INTO books(title, fk_author_id, fk_genre_id, written) VALUES ('Childhood'
 INSERT INTO books(title, fk_author_id, fk_genre_id, written) VALUES ('Boyhood', 5, 3, '1854');
 INSERT INTO books(title, fk_author_id, fk_genre_id, written) VALUES ('Love in the Time of Cholera', 7, 4, '1985');
 INSERT INTO books(title, fk_author_id, fk_genre_id, written) VALUES ('The Book of Calculation', 8, 7, '1202');
+
+INSERT INTO comments(commentary, fk_book_id) VALUES ('excellent', 1);
+INSERT INTO comments(commentary, fk_book_id) VALUES ('nice', 2);
+INSERT INTO comments(commentary, fk_book_id) VALUES ('awesome book', 2);
+INSERT INTO comments(commentary, fk_book_id) VALUES ('pretty good', 3);
+INSERT INTO comments(commentary, fk_book_id) VALUES ('very good', 5);
