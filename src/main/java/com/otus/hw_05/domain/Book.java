@@ -3,11 +3,13 @@ package com.otus.hw_05.domain;
 import lombok.*;
 
 import javax.persistence.*;
+import java.util.ArrayList;
+import java.util.List;
 
 @Getter
 @Setter
 @ToString
-@EqualsAndHashCode(onlyExplicitlyIncluded = true)
+@EqualsAndHashCode
 @NoArgsConstructor
 @AllArgsConstructor
 @Entity
@@ -30,11 +32,29 @@ public class Book {
     @Column(name = "written")
     private String year;
 
+    @OneToMany(
+        mappedBy = "book",
+        cascade = CascadeType.ALL,
+        orphanRemoval = true
+    )
+    @EqualsAndHashCode.Exclude
+    private List<Comment> comments = new ArrayList<>();
+
     public Book(final String title, final long authorId, final long genreId, final String year) {
         this.title = title;
         this.authorId = authorId;
         this.genreId = genreId;
         this.year = year;
+    }
+
+    public void addComment(final Comment comment) {
+        comments.add(comment);
+        comment.setBook(this);
+    }
+
+    public void removeComment(final Comment comment) {
+        comments.remove(comment);
+        comment.setBook(null);
     }
 
 }
