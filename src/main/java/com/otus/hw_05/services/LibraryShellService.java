@@ -12,6 +12,7 @@ import org.springframework.shell.standard.ShellMethod;
 import org.springframework.stereotype.Service;
 
 import java.sql.SQLException;
+import java.util.Arrays;
 
 @Service
 @ShellComponent
@@ -71,7 +72,7 @@ public class LibraryShellService {
 
     @ShellMethod("Display all available books.")
     public void displayBooksWithDetails() {
-        bookDao.findAllWithDetails().forEach(g -> System.out.println(g.toString()));
+        bookDao.findAllWithDetails().forEach(g -> System.out.println(Arrays.toString(g)));
     }
 
     @ShellMethod("Runs database console")
