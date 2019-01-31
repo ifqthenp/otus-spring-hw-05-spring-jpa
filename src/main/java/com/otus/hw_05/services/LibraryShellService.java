@@ -2,6 +2,7 @@ package com.otus.hw_05.services;
 
 import com.otus.hw_05.dao.AuthorDao;
 import com.otus.hw_05.dao.BookDao;
+import com.otus.hw_05.dao.CommentDao;
 import com.otus.hw_05.dao.GenreDao;
 import com.otus.hw_05.domain.Genre;
 import org.h2.tools.Console;
@@ -19,12 +20,17 @@ public class LibraryShellService {
     private final GenreDao genreDao;
     private final AuthorDao authorDao;
     private final BookDao bookDao;
+    private final CommentDao commentDao;
 
     @Autowired
-    public LibraryShellService(final GenreDao genreDao, final AuthorDao authorDao, final BookDao bookDao) {
+    public LibraryShellService(final GenreDao genreDao,
+                               final AuthorDao authorDao,
+                               final BookDao bookDao,
+                               final CommentDao commentDao) {
         this.genreDao = genreDao;
         this.authorDao = authorDao;
         this.bookDao = bookDao;
+        this.commentDao = commentDao;
     }
 
     @ShellMethod("Display all available genres.")
@@ -71,6 +77,16 @@ public class LibraryShellService {
     @ShellMethod("Runs database console")
     public void dbConsole() throws SQLException {
         Console.main();
+    }
+
+    @ShellMethod("Display all comments")
+    public void displayAllComments() {
+        commentDao.findAll().forEach(comment -> System.out.println(comment.toString()));
+    }
+
+    @ShellMethod("Display comment for book id")
+    public void displayCommentForBookId(final long bookId) {
+        System.out.println(commentDao.findByBookId(bookId));
     }
 
 }
