@@ -1,33 +1,22 @@
 package com.otus.hw_05.dao
 
-
+import com.otus.hw_05.dao.impl.GenreDaoJpaImpl
 import com.otus.hw_05.domain.Genre
-import org.spockframework.spring.SpringBean
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.shell.Shell
-import org.springframework.test.jdbc.JdbcTestUtils
 import spock.lang.Specification
 import spock.lang.Subject
 
-@JdbcTest
-@Import(JdbcGenreDao)
+@DataJpaTest
+@Import(GenreDaoJpaImpl)
 class GenreDaoSpec extends Specification {
-
-    @SpringBean
-    Shell shell = Mock()
 
     @Subject
     @Autowired
     GenreDao genreDao
 
-    @Autowired
-    JdbcTemplate jdbcTemplate
-
     void setup() {
-        assert jdbcTemplate != null
         assert genreDao != null
     }
 
@@ -54,11 +43,8 @@ class GenreDaoSpec extends Specification {
         given:
         Iterable<Genre> genres = genreDao.findAll()
 
-        and:
-        def genresTableRowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, "genres")
-
         expect:
-        genres.size() == genresTableRowsCount
+        genres.size() > 0
     }
 
     def "returns null if genre is not found"() {
@@ -69,6 +55,11 @@ class GenreDaoSpec extends Specification {
         expect:
         genreById == null
         genreByName == null
+    }
+
+    def "can count genres in the table"() {
+        expect:
+        genreDao.count() == 7
     }
 
     def "can save a genre"() {
@@ -84,18 +75,21 @@ class GenreDaoSpec extends Specification {
         genreDao.findAll().any { it.genre == genreName }
     }
 
+
     def "can save a collection of genres"() {
         given:
-        def before = genreDao.findAll()
+        def genres = genreDao.findAll()
 
         and:
         def genreCollection = ['Drama', 'Comedy', 'Satire'].collect { new Genre(it) }
-        def after = genreDao.save(genreCollection)
 
-        expect:
-        after.size() == before.size() + genreCollection.size()
-        after.any { it.genre == genreCollection.first().genre }
-        after.any() { it.genre == genreCollection.last().genre }
+        when:
+        genres = genreDao.save(genreCollection)
+
+        then:
+        genres.size() == old(genres.size()) + genreCollection.size()
+        genres.any { it.genre == genreCollection.first().genre }
+        genres.any() { it.genre == genreCollection.last().genre }
     }
 
     def "can delete a genre"() {
@@ -112,6 +106,5 @@ class GenreDaoSpec extends Specification {
 
     void cleanup() {
         genreDao = null
-        jdbcTemplate = null
     }
 }

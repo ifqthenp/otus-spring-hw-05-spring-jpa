@@ -1,38 +1,30 @@
 package com.otus.hw_05.dao
 
-
+import com.otus.hw_05.dao.impl.BookDaoJpaImpl
+import com.otus.hw_05.dao.impl.CommentDaoJpaImpl
 import com.otus.hw_05.domain.Book
-import org.spockframework.spring.SpringBean
+import com.otus.hw_05.domain.Comment
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.boot.test.autoconfigure.jdbc.JdbcTest
+import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest
 import org.springframework.context.annotation.Import
-import org.springframework.jdbc.core.JdbcTemplate
-import org.springframework.shell.Shell
-import org.springframework.test.jdbc.JdbcTestUtils
-import spock.lang.Shared
+import org.springframework.test.annotation.DirtiesContext
 import spock.lang.Specification
 import spock.lang.Subject
 
-@JdbcTest
-@Import(JdbcBookDao)
+@DataJpaTest
+@Import([BookDaoJpaImpl, CommentDaoJpaImpl])
 class BookDaoSpec extends Specification {
-
-    @SpringBean
-    Shell shell = Mock()
 
     @Subject
     @Autowired
     BookDao bookDao
 
-    @Shared
-    String table = 'books'
-
     @Autowired
-    JdbcTemplate jdbcTemplate
+    CommentDao commentDao
 
     void setup() {
         assert bookDao != null
-        assert jdbcTemplate != null
+        assert commentDao != null
     }
 
     def "can find book by id"() {
@@ -41,13 +33,8 @@ class BookDaoSpec extends Specification {
 
         and:
         Book book = bookDao.findById(bookId)
-        assert book != null
-
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, table, "id = $bookId")
 
         expect:
-        rowsCount == 1
         with(book) {
             id == bookId
             title == 'Jane Eyre'
@@ -59,135 +46,112 @@ class BookDaoSpec extends Specification {
 
     def "can find books by title, case insensitive"() {
         given:
-        def bookTitle = 'time'
-        def emptyTest = 'test'
-
-        and:
-        Iterable<Book> books = bookDao.findByTitle(bookTitle)
-        Iterable<Book> emptyBooks = bookDao.findByTitle(emptyTest)
-
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, table,
-            "LOWER(title) LIKE LOWER('%$bookTitle%')")
+        Iterable<Book> childBooks = bookDao.findByTitle('child')
+        Iterable<Book> timeBooks = bookDao.findByTitle('time')
+        Iterable<Book> emptyBooks = bookDao.findByTitle('test')
 
         expect:
-        rowsCount == 2
-        books.size() == 2
+        childBooks.size() == 1
+        timeBooks.size() == 2
         emptyBooks.isEmpty()
     }
 
     def "returns null if book is not found by id"() {
         given:
-        def id = 0
-
-        and:
-        Book book = bookDao.findById(id)
-        def rowsCount = JdbcTestUtils.countRowsInTableWhere(jdbcTemplate, table, "id = $id")
+        Book book = bookDao.findById(0)
 
         expect:
         book == null
-        rowsCount == 0
     }
 
     def "can find all books"() {
         given:
         Iterable<Book> books = bookDao.findAll()
 
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
-
         expect:
-        books.size() == rowsCount
+        books.size() == 10
     }
 
+    def "can count books in the table"() {
+        expect:
+        bookDao.count() == 10
+    }
+
+    @DirtiesContext
     def "can save a book"() {
         given:
-        def bookTitle = 'War and Peace'
-        def authorId = 5
-        def genreId = 1
-        def year = '1869'
-
-        and:
-        Book book = new Book(bookTitle, authorId, genreId, year)
-
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
+        Book book = new Book('War and Peace', 5, 1, '1869')
+        def allBooks = bookDao.findAll()
 
         when:
         book = bookDao.save(book)
-
-        and:
-        rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
+        allBooks = bookDao.findAll()
 
         then:
-        book != old(book)
-        rowsCount == old(rowsCount) + 1
-
+        book.id == 11
+        allBooks.size() == old(allBooks.size()) + 1
     }
 
+    @DirtiesContext
     def "can save a collection of books"() {
         given:
-        Iterable<Book> books = bookDao.findAll()
+        Iterable<Book> allBooks = bookDao.findAll()
 
         and:
-        def booksCollection = [['War and Peace', 5, 1, '1869'], ['The Invisible Man', 4, 5, '1933']].collect {
+        def newBooks = [['War and Peace', 5, 1, '1869'], ['The Invisible Man', 4, 5, '1933']].collect {
             new Book(it[0] as String, it[1] as Long, it[2] as Long, it[3] as String)
         }
 
         when:
-        books = bookDao.save(booksCollection)
+        allBooks = bookDao.save(newBooks)
 
         then:
-        books != old(books)
-        books.size() == old(books.size()) + booksCollection.size()
+        allBooks != old(allBooks)
+        allBooks.size() == old(allBooks.size()) + newBooks.size()
     }
 
+    @DirtiesContext
     def "can delete a book"() {
         given:
         def bookId = 3
         Book book = bookDao.findById(bookId)
         assert book != null
 
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
-
         when:
         bookDao.delete(book)
 
-        and:
-        rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
-
         then:
-        rowsCount == old(rowsCount) - 1
         bookDao.findById(bookId) == null
     }
 
     def "can find books by author"() {
         given:
-        def author = 'leo'
+        def leo = 'leo'
         def emptyTest = 'test'
 
         when:
-        Iterable<Book> books = bookDao.findByAuthor(author)
+        Iterable<Book> leoBooks = bookDao.findByAuthor(leo)
         Iterable<Book> emptyBooks = bookDao.findByAuthor(emptyTest)
 
         then:
-        books != null
-        books.size() > 0
+        leoBooks.size() > 1
         emptyBooks.isEmpty()
     }
 
-    def "can find books by genre"() {
+    def "can find books by genre, case insensitive"() {
         given:
-        def genre = 'biography'
+        def bio = 'biography'
+        def fantasy = 'fant'
         def emptyTest = 'test'
 
         when:
-        Iterable<Book> books = bookDao.findByGenre(genre)
+        Iterable<Book> bios = bookDao.findByGenre(bio)
+        Iterable<Book> fantasies = bookDao.findByGenre(fantasy)
         Iterable<Book> emptyBooks = bookDao.findByGenre(emptyTest)
 
         then:
-        books.size() > 0
+        bios.size() == 3
+        fantasies.size() == 1
         emptyBooks.isEmpty()
     }
 
@@ -195,17 +159,52 @@ class BookDaoSpec extends Specification {
         given:
         def books = bookDao.findAllWithDetails()
 
-        and:
-        def rowsCount = JdbcTestUtils.countRowsInTable(jdbcTemplate, table)
-
         expect:
-        books.size() == rowsCount
-        books[0].get('author') == 'Lewis Carrol'
-        books[0].get('genre') == 'Fantasy'
+        with(books.first()) {
+            it[0] == 1
+            it[1] == 'Alice in Wonderland'
+            it[2] == 'Lewis Carrol'
+            it[3] == 'Fantasy'
+            it[4] == '1865'
+        }
+        books.size() == 10
+    }
+
+    @DirtiesContext
+    def "can add a comment to a book"() {
+        given:
+        def bookId = 1
+        def text = 'The best book ever'
+        Comment comment = new Comment(text)
+        Book book = bookDao.findById(bookId)
+
+        when:
+        book.addComment(comment)
+        book = bookDao.save(book)
+
+        then:
+        book.comments.last().commentary == text
+        book.getComments().size() == old(book.getComments().size()) + 1
+    }
+
+    @DirtiesContext
+    def "can delete a comment from a book"() {
+        given:
+        def bookId = 2
+        def commentId = 3
+        def comment = commentDao.findById(commentId)
+        def book = bookDao.findById(bookId)
+
+        when:
+        book.removeComment(comment)
+        book = bookDao.save(book)
+
+        then:
+        book.comments.size() == old(book.comments.size()) - 1
     }
 
     void cleanup() {
         bookDao = null
-        jdbcTemplate == null
+        commentDao = null
     }
 }
