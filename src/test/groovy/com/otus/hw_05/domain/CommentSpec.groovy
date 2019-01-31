@@ -11,44 +11,46 @@ class CommentSpec extends Specification {
 
         expect:
         comment.getId() == 0
-        comment.getComment() == null
+        comment.getCommentary() == null
     }
 
     def "all-args constructor sets attributes to the specified ones"() {
         given:
         def text = "The best book ever!"
-        Comment comment = new Comment(3, text)
+        def book = new Book()
+        Comment comment = new Comment(3, text, book)
         assert comment != null
 
         expect:
         comment.getId() == 3
-        comment.getComment() == text
+        comment.getCommentary() == text
+        comment.getBook() == book
     }
 
-    def "single-arg constructor sets attributes to correct values"() {
+    def "two-args constructor sets attributes to correct values"() {
         given:
         def text = "The best book ever!"
-        Comment comment = new Comment(text)
+        Comment comment = new Comment(text, new Book())
         assert comment != null
 
         expect:
         comment.getId() == 0
-        comment.getComment() == text
-
+        comment.getCommentary() == text
     }
 
     def "all getters and setters work correctly"() {
         given:
         def text = "The best book ever!"
-        Comment comment = new Comment(2, text)
+        def book = new Book()
+        Comment comment = new Comment(2, text, book)
         assert comment != null
 
         when:
         comment.setId(3)
-        comment.setComment("Not the best!")
+        comment.setCommentary("Not the best!")
 
         then:
         comment.getId() != old(comment.getId())
-        comment.getComment() != old(comment.getComment())
+        comment.getCommentary() != old(comment.getCommentary())
     }
 }

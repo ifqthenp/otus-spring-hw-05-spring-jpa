@@ -26,9 +26,10 @@ class BookSpec extends Specification {
         def aId = 5L
         def gId = 1L
         def bookYear = '1869'
+        def comms = []
 
         and:
-        Book book = new Book(bookId, bookTitle, aId, gId, bookYear)
+        Book book = new Book(bookId, bookTitle, aId, gId, bookYear, comms)
 
         expect:
         with(book) {
@@ -37,6 +38,7 @@ class BookSpec extends Specification {
             authorId == aId
             genreId == gId
             year == bookYear
+            comments == comms
         }
     }
 
