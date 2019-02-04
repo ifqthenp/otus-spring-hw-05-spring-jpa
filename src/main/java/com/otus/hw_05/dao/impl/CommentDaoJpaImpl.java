@@ -40,7 +40,11 @@ public class CommentDaoJpaImpl implements CommentDao {
 
     @Override
     public Comment save(final Comment domain) {
-        em.persist(domain);
+        if (domain.getId() == null) {
+            em.persist(domain);
+        } else {
+            em.merge(domain);
+        }
         return domain;
     }
 
@@ -52,9 +56,10 @@ public class CommentDaoJpaImpl implements CommentDao {
 
     @Override
     public void delete(final Comment domain) {
-        if (domain != null) {
-            domain.getBook().removeComment(domain);
+        if (em.contains(domain)) {
             em.remove(domain);
+        } else {
+            em.merge(domain);
         }
     }
 
