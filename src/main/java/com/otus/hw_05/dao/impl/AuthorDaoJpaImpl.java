@@ -33,7 +33,11 @@ public class AuthorDaoJpaImpl implements AuthorDao {
 
     @Override
     public Author save(final Author domain) {
-        em.persist(domain);
+        if (domain.getId() == null) {
+            em.persist(domain);
+        } else {
+            em.merge(domain);
+        }
         return domain;
     }
 
@@ -45,7 +49,11 @@ public class AuthorDaoJpaImpl implements AuthorDao {
 
     @Override
     public void delete(final Author domain) {
-        em.remove(domain);
+        if (em.contains(domain)) {
+            em.remove(domain);
+        } else {
+            em.merge(domain);
+        }
     }
 
     @Override
