@@ -38,7 +38,11 @@ public class GenreDaoJpaImpl implements GenreDao {
 
     @Override
     public Genre save(final Genre domain) {
-        em.persist(domain);
+        if (domain.getId() == null) {
+            em.persist(domain);
+        } else {
+            em.merge(domain);
+        }
         return domain;
     }
 
@@ -50,7 +54,11 @@ public class GenreDaoJpaImpl implements GenreDao {
 
     @Override
     public void delete(final Genre domain) {
-        em.remove(domain);
+        if (em.contains(domain)) {
+            em.remove(domain);
+        } else {
+            em.merge(domain);
+        }
     }
 
     @Override
