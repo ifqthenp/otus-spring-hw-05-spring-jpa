@@ -61,8 +61,11 @@ public class BookDaoJpaImpl implements BookDao {
 
     @Override
     public Book save(final Book domain) {
-        em.persist(domain);
-        em.flush();
+        if (domain.getId() == null) {
+            em.persist(domain);
+        } else {
+            em.merge(domain);
+        }
         return domain;
     }
 
@@ -74,7 +77,11 @@ public class BookDaoJpaImpl implements BookDao {
 
     @Override
     public void delete(final Book domain) {
-        em.remove(domain);
+        if (em.contains(domain)) {
+            em.remove(domain);
+        } else {
+            em.merge(domain);
+        }
     }
 
     @Override
