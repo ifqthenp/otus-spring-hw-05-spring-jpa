@@ -11,7 +11,7 @@ class BookSpec extends Specification {
 
         expect:
         with(book) {
-            id == 0
+            id == null
             title == null
             authorId == 0
             genreId == 0
@@ -54,7 +54,7 @@ class BookSpec extends Specification {
 
         expect:
         with(book) {
-            id == 0
+            id == null
             title == bookTitle
             authorId == aId
             genreId == gId

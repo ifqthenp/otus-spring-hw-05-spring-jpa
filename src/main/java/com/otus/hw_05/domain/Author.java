@@ -16,7 +16,7 @@ public class Author {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private long id;
+    private Long id;
 
     @EqualsAndHashCode.Include
     @Column(name = "first_name")

@@ -10,7 +10,7 @@ class CommentSpec extends Specification {
         assert comment != null
 
         expect:
-        comment.getId() == 0
+        comment.getId() == null
         comment.getCommentary() == null
     }
 
@@ -34,7 +34,7 @@ class CommentSpec extends Specification {
         assert comment != null
 
         expect:
-        comment.getId() == 0
+        comment.getId() == null
         comment.getCommentary() == text
     }
 

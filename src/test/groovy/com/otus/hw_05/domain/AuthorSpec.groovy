@@ -12,7 +12,7 @@ class AuthorSpec extends Specification {
 
         expect:
         with(author) {
-            id == 0
+            id == null
             firstName == null
             lastName == null
         }
@@ -36,7 +36,7 @@ class AuthorSpec extends Specification {
         Author author = new Author('Carl', 'Marx')
 
         expect:
-        author.getId() == 0
+        author.getId() == null
         author.getFirstName() == 'Carl'
         author.getLastName() == 'Marx'
 

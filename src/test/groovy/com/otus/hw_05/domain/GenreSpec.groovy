@@ -11,7 +11,7 @@ class GenreSpec extends Specification {
         assert genre != null
 
         expect:
-        genre.getId() == 0
+        genre.getId() == null
         genre.getGenre() == null
     }
 
@@ -31,7 +31,7 @@ class GenreSpec extends Specification {
         assert genre != null
 
         expect:
-        genre.getId() == 0
+        genre.getId() == null
         genre.getGenre() == 'Fiction'
 
     }
